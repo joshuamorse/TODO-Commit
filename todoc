@@ -11,6 +11,10 @@ $file          = 'TODO.markdown';
 $diff_cmd      = sprintf('git diff %s', $file);
 $removed_lines = array();
 
+if (!file_exists($file)) {
+	die(sprintf("Can't find '%s'!\n", $file));
+}
+
 exec($diff_cmd, $output);
 
 foreach ($output as $line) {
@@ -37,5 +41,5 @@ $confirm = fgetc(STDIN);
 if ('n' !== $confirm) {
 	system($commit_cmd);
 } else {
-	die("\n".'Bye!'."\n");
+	die('Bye!'."\n");
 }
