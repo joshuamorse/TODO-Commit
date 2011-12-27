@@ -1,0 +1,41 @@
+#!/usr/bin/env php
+<?php
+
+/**
+ * A PHP-CLI script to append removed lines from a TODO file to a commit message.
+ *
+ * @author Joshua Morse <dashvibe@gmail.com>
+ */
+
+$file          = 'TODO.markdown';
+$diff_cmd      = sprintf('git diff %s', $file);
+$removed_lines = array();
+
+exec($diff_cmd, $output);
+
+foreach ($output as $line) {
+	/**
+	 * Check for a removed line.
+	 * Remove the leading '-' char and add it to ``$removed_lines``.
+	 */
+	if (preg_match('/^\-\w+/', $line)) {
+		$removed_lines[] .= substr(trim($line), 1);
+	}
+}
+
+if (!$removed_lines) {
+	die(sprintf("No lines removed from '%s'.\n", $file));
+}
+
+$commit_msg = implode('; ', $removed_lines);
+$commit_cmd = sprintf('git commit -a -m "%s"', $commit_msg);
+
+echo sprintf("About to run the following command: '%s'\nIs this okay? (Y/n)", $commit_cmd);
+
+$confirm = fgetc(STDIN);
+
+if ('n' !== $confirm) {
+	system($commit_cmd);
+} else {
+	die("\n".'Bye!'."\n");
+}
